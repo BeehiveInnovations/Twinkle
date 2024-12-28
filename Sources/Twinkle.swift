@@ -37,13 +37,13 @@ private let TwinkleLayerMinificationFilter = "trilinear"
 /// ✨ Twinkle, a Swift and easy way to make any UIView twinkle.
 public class Twinkle {
   
-  /// Casts a spell on the provided view allowing it to twinkle.
+  /// Casts a spell on the provided view allowing it to twinkle with a specified size.
   ///
   /// - Parameters:
-  ///   - view: UIView that will twinkle
-  ///   - image: Optional twinkle image
-  ///   - color: Optional color for the default twinkle image
-  public class func twinkle(_ view: UIView, image: UIImage? = nil) {
+  ///   - view: UIView that will twinkle.
+  ///   - image: Optional twinkle image.
+  ///   - size: The size of the twinkle effect. Default is `1.0`.
+  public class func twinkle(_ view: UIView, image: UIImage? = nil, size: CGFloat = 1.0) {
     var twinkleLayers: [TwinkleLayer] = []
     
     let upperBound: UInt32 = 10
@@ -51,7 +51,7 @@ public class Twinkle {
     let count: UInt = UInt(arc4random_uniform(upperBound) + lowerBound)
     
     for i in 0..<count {
-      let twinkleLayer: TwinkleLayer = image == nil ? TwinkleLayer() : TwinkleLayer(image: image!)
+      let twinkleLayer: TwinkleLayer = image == nil ? TwinkleLayer(size: size) : TwinkleLayer(image: image!, size: size)
       let x: Int = Int(arc4random_uniform(UInt32(view.layer.bounds.size.width)))
       let y: Int = Int(arc4random_uniform(UInt32(view.layer.bounds.size.height)))
       twinkleLayer.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
@@ -61,7 +61,7 @@ public class Twinkle {
       
       twinkleLayer.addPositionAnimation()
       twinkleLayer.addRotationAnimation()
-      twinkleLayer.addFadeInOutAnimation( CACurrentMediaTime() + CFTimeInterval(0.15 * Float(i)))
+      twinkleLayer.addFadeInOutAnimation(CACurrentMediaTime() + CFTimeInterval(0.15 * Float(i)))
     }
     
     twinkleLayers.removeAll(keepingCapacity: false)
@@ -83,21 +83,26 @@ public class Twinkle {
 
 internal class TwinkleLayer: CAEmitterLayer {
   
-  // MARK: object lifecycle
+  private var twinkleSize: CGFloat = 1.0
   
-  internal convenience init(image: UIImage) {
+  internal convenience init(image: UIImage, size: CGFloat) {
     self.init()
+    self.twinkleSize = size
     self.commonInit(image)
+  }
+  
+  internal convenience init(size: CGFloat) {
+    self.init()
+    self.twinkleSize = size
+    self.commonInit()
   }
   
   internal override init() {
     super.init()
-    self.commonInit()
   }
   
   internal required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
-    self.commonInit()
   }
   
   internal func commonInit(_ image: UIImage? = nil) {
@@ -109,7 +114,6 @@ internal class TwinkleLayer: CAEmitterLayer {
       if let imagePath = Bundle.module.path(forResource: "TwinkleImage", ofType: "png") {
         twinkleImage = UIImage(contentsOfFile: imagePath)
       }
-      
       
       if twinkleImage == nil {
         let frameworkBundle = Bundle(for: self.classForCoder)
@@ -129,9 +133,9 @@ internal class TwinkleLayer: CAEmitterLayer {
       cell.emissionRange = (.pi / 4)
       cell.velocity = 2
       cell.velocityRange = 18
-      cell.scale = 0.65
-      cell.scaleRange = 0.7
-      cell.scaleSpeed = 0.6
+      cell.scale = 0.65 * twinkleSize
+      cell.scaleRange = 0.7 * twinkleSize
+      cell.scaleSpeed = 0.6 * twinkleSize
       cell.spin = 0.9
       cell.spinRange = .pi
       cell.color = UIColor(white: 1.0, alpha: 0.3).cgColor
@@ -149,7 +153,6 @@ internal class TwinkleLayer: CAEmitterLayer {
     self.emitterMode = CAEmitterLayerEmitterMode.surface
     self.renderMode = CAEmitterLayerRenderMode.unordered
   }
-  
 }
 
 fileprivate let TwinkleLayerPositionAnimationKey = "positionAnimation"
@@ -231,8 +234,9 @@ extension CGPoint {
 extension UIView {
   
   /// UIView extension that provides a convenient means for triggering a twinkle effect.
-  public func twinkle() {
-    Twinkle.twinkle(self)
+  /// - Parameter size: The size of the twinkle effect. Default is `1.0`.
+  public func twinkle(size: CGFloat = 1.0) {
+    Twinkle.twinkle(self, size: size)
   }
   
   public func removeTwinkle() {
