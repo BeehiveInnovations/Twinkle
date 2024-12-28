@@ -40,4 +40,6 @@ Pods/
 # Carthage
 Carthage/Checkouts
 Carthage/Build
-
+.DerivedData
+.DerivedData.noindex
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
