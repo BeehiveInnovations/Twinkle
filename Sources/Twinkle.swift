@@ -38,12 +38,13 @@ private let TwinkleLayerMinificationFilter = "trilinear"
 public class Twinkle {
   
   /// Casts a spell on the provided view allowing it to twinkle with a specified size.
-  ///
+  /// 
   /// - Parameters:
   ///   - view: UIView that will twinkle.
   ///   - image: Optional twinkle image.
   ///   - size: The size of the twinkle effect. Default is `1.0`.
-  public class func twinkle(_ view: UIView, image: UIImage? = nil, size: CGFloat = 1.0) {
+  ///   - color: a tint color for the sparkle
+  public class func twinkle(_ view: UIView, image: UIImage? = nil, size: CGFloat = 1.0, color: UIColor? = nil) {
     var twinkleLayers: [TwinkleLayer] = []
     
     let upperBound: UInt32 = 10
@@ -51,7 +52,10 @@ public class Twinkle {
     let count: UInt = UInt(arc4random_uniform(upperBound) + lowerBound)
     
     for i in 0..<count {
-      let twinkleLayer: TwinkleLayer = image == nil ? TwinkleLayer(size: size) : TwinkleLayer(image: image!, size: size)
+      let twinkleLayer: TwinkleLayer = image == nil
+      ? TwinkleLayer(size: size, color: color)
+      : TwinkleLayer(image: image!, size: size, color: color)
+      
       let x: Int = Int(arc4random_uniform(UInt32(view.layer.bounds.size.width)))
       let y: Int = Int(arc4random_uniform(UInt32(view.layer.bounds.size.height)))
       twinkleLayer.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
@@ -84,16 +88,19 @@ public class Twinkle {
 internal class TwinkleLayer: CAEmitterLayer {
   
   private var twinkleSize: CGFloat = 1.0
+  private var twinkleColor: UIColor? = nil
   
-  internal convenience init(image: UIImage, size: CGFloat) {
+  internal convenience init(image: UIImage, size: CGFloat, color: UIColor?) {
     self.init()
     self.twinkleSize = size
+    self.twinkleColor = color
     self.commonInit(image)
   }
   
-  internal convenience init(size: CGFloat) {
+  internal convenience init(size: CGFloat, color: UIColor?) {
     self.init()
     self.twinkleSize = size
+    self.twinkleColor = color
     self.commonInit()
   }
   
@@ -123,6 +130,10 @@ internal class TwinkleLayer: CAEmitterLayer {
       }
     }
     
+    if let twinkleColor {
+      twinkleImage = twinkleImage?.withTintColor(twinkleColor)
+    }
+    
     self.emitterCells?.removeAll()
     
     let emitterCells: [CAEmitterCell] = [CAEmitterCell(), CAEmitterCell()]
@@ -138,7 +149,12 @@ internal class TwinkleLayer: CAEmitterLayer {
       cell.scaleSpeed = 0.6 * twinkleSize
       cell.spin = 0.9
       cell.spinRange = .pi
-      cell.color = UIColor(white: 1.0, alpha: 0.3).cgColor
+      if let twinkleColor {
+        cell.color = twinkleColor.withAlphaComponent(0.3).cgColor
+      }
+      else {
+        cell.color = UIColor(white: 1.0, alpha: 0.3).cgColor
+      }
       cell.alphaSpeed = -0.8
       cell.contents = twinkleImage?.cgImage
       cell.magnificationFilter = TwinkleLayerMagnificationFilter
@@ -235,8 +251,9 @@ extension UIView {
   
   /// UIView extension that provides a convenient means for triggering a twinkle effect.
   /// - Parameter size: The size of the twinkle effect. Default is `1.0`.
-  public func twinkle(size: CGFloat = 1.0) {
-    Twinkle.twinkle(self, size: size)
+  /// - Parameter color: tint color for the sparkle
+  public func twinkle(size: CGFloat = 1.0, color: UIColor? = nil) {
+    Twinkle.twinkle(self, size: size, color: color)
   }
   
   public func removeTwinkle() {
