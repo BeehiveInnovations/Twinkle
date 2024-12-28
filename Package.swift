@@ -3,19 +3,22 @@
 import PackageDescription
 
 let package = Package(
-    name: "Twinkle",
-    platforms: [
-      .iOS(.v10),
-      .tvOS(.v10)
-    ],
-    products: [
-      .library(name: "Twinkle", targets: ["Twinkle"])
-    ],
-    targets: [
-      .target(
-          name: "Twinkle",
-          path: "Sources"
-      )
-    ],
-    swiftLanguageVersions: [.v5]
+  name: "Twinkle",
+  platforms: [
+    .iOS(.v12),
+    .tvOS(.v12)
+  ],
+  products: [
+    .library(name: "Twinkle", targets: ["Twinkle"])
+  ],
+  targets: [
+    .target(
+      name: "Twinkle",
+      path: "Sources",
+      resources: [
+        .process("Resources/TwinkleImage.png")
+      ]
+    )
+  ],
+  swiftLanguageVersions: [.v5]
 )

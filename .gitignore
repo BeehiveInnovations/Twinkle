@@ -43,3 +43,7 @@ Carthage/Build
 .DerivedData
 .DerivedData.noindex
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+DerivedDataSimulator
+DerivedData
+archives
+Twinkle.xcframework
